@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>King Khan, Cached — The Record</title>
+<title>King Khan, Katched — The Record</title>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   body {
@@ -79,17 +79,17 @@
     <a class="btn" href="index.html">desktop</a>
     <a class="btn here" href="#">the record (films)</a>
     <a class="btn" href="fanweb.html">the residue (fan web)</a>
+    <a class="btn" href="reading.html">the reading room</a>
   </div>
 
   <div class="head">
     <h1>The Record</h1>
-    <p>Every Shah Rukh Khan film from 1992 to 2006, as it survives on the Internet Archive — DVD-9 rips someone uploaded, plus one scanned biography, King of Bollywood. <b>Click to explore the metadata.</b> </p>
-    <div class="stamp" id="stamp">loading the shelf…</div>
+    <p>Every Shah Rukh Khan film from 1992 to 2006, as it survives on the Internet Archive. These are DVD-9 rips someone uploaded with stills from the movies all added in 2026, plus one scanned biography, King of Bollywood from 2019. <b>Click to explore the metadata.</b></p>
   </div>
 
   <div class="shelf" id="shelf"></div>
 
-  <footer>✦ every film made across fourteen years, archived in a single recent wave ✦</footer>
+  <footer>✦ every film made across fourteen years ✦</footer>
 </div>
 
 <!-- modal -->
@@ -132,8 +132,6 @@ function renderShelf(){
       <div class="cap"><div class="yr">${yr(f.film_year)}</div>
       <div class="ti">${(f.label||f.identifier).replace(/\s*\(\d{4}\).*/,'').slice(0,46)}</div></div>
     </div>`).join("");
-  document.getElementById('stamp').textContent =
-    `${FILMS.length} films · ${yr(FILMS[0].film_year)}–${yr(FILMS[FILMS.length-1].film_year)} · all archived in one wave`;
 }
 
 function openModal(i){
@@ -176,8 +174,7 @@ fetch('king_khan_cached_films_dataset.csv')
   .then(t=>{ FILMS=parseCSV(t).filter(f=>f.identifier); renderShelf(); })
   .catch(()=>{
     // fallback to the sample so the page is never blank
-    fetch('films_sample.csv').then(r=>r.text()).then(t=>{ FILMS=parseCSV(t); renderShelf();
-      document.getElementById('stamp').textContent += ' · (sample data — drop in your real CSV)'; })
+    fetch('films_sample.csv').then(r=>r.text()).then(t=>{ FILMS=parseCSV(t); renderShelf(); })
     .catch(()=>{ document.getElementById('shelf').innerHTML='<p style="padding:20px">No films CSV found. Put king_khan_cached_films_dataset.csv next to this file and run a local server.</p>'; });
   });
 </script>

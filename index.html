@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>King Khan, Cached</title>
+<title>King Khan, Katched</title>
 <!-- 3D disc later: uncomment & swap .disc-css for <model-viewer src="disc.glb"> -->
 <!-- <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script> -->
 <style>
@@ -11,21 +11,26 @@
   html,body { min-height:100%; }
   body {
     font-family: Verdana, Tahoma, sans-serif; color:#efeaff; overflow-x:hidden;
-    background-color:#6a55a8;
-    background-image:linear-gradient(135deg,#4a3a82,#6a4fb0 25%,#8a6fcc 50%,#a98fe0 70%,#7a5fbe 90%,#5a45a0);
+    background-color:#9a7fe0;
+    background-image:linear-gradient(135deg,#7d62c4,#9a78e0 22%,#bfa3f5 42%,#d9c4ff 58%,#a98fe8 78%,#8a6fd0);
     background-size:300% 300%; background-attachment:fixed; animation:bgdrift 22s ease-in-out infinite;
   }
   @keyframes bgdrift{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  /* y2k perspective grid wash */
+  body::before{ content:""; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.18;
+    background-image:linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+    background-size:46px 46px; mask-image:linear-gradient(to bottom, rgba(0,0,0,.7), transparent 70%); }
   body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:90;
-    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(20,10,40,.10) 2px 4px);
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(40,20,80,.06) 2px 4px);
     background-size:100% 4px; animation:scan 8s linear infinite; }
   @keyframes scan{ to{ background-position:0 100px; } }
 
   .blobs{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
-  .blob{ position:absolute; border-radius:50%; filter:blur(70px); opacity:.4; mix-blend-mode:screen; }
-  .blob.b1{ width:460px; height:460px; background:#b79bf0; left:-80px; top:-60px; animation:drift1 26s ease-in-out infinite; }
-  .blob.b2{ width:380px; height:380px; background:#d6c2ff; right:-60px; top:30%; animation:drift2 32s ease-in-out infinite; }
-  .blob.b3{ width:520px; height:520px; background:#7a5fbe; left:30%; bottom:-140px; animation:drift3 30s ease-in-out infinite; }
+  .blob{ position:absolute; border-radius:50%; filter:blur(90px); opacity:.6; mix-blend-mode:screen; }
+  .blob.b1{ width:620px; height:620px; background:#d9b8ff; left:-120px; top:-100px; animation:drift1 26s ease-in-out infinite; }
+  .blob.b2{ width:520px; height:520px; background:#f0e4ff; right:-100px; top:24%; animation:drift2 32s ease-in-out infinite; }
+  .blob.b3{ width:680px; height:680px; background:#a98fe8; left:28%; bottom:-200px; animation:drift3 30s ease-in-out infinite; }
+  .blob.b4{ width:440px; height:440px; background:#c2a3ff; right:18%; top:-80px; animation:drift1 28s ease-in-out infinite reverse; }
   @keyframes drift1{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(120px,80px)} }
   @keyframes drift2{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(-100px,60px)} }
   @keyframes drift3{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(80px,-90px)} }
@@ -162,9 +167,9 @@
   .enter-disc:hover .disc-css{ box-shadow:0 0 0 3px #2e2150, 0 0 32px rgba(190,166,240,.85); }
   .enter-label{ font-size:46px; font-weight:bold; letter-spacing:5px; color:#efeaff; text-shadow:-2px 0 0 #ff7ad9, 2px 0 0 #6fe8ff; animation:enterflick 2.4s steps(2) infinite; }
   @keyframes enterflick{ 0%,94%,100%{opacity:1} 95%{opacity:.4} 96%{opacity:1} }
-  .enter-sub{ font-family:"Courier New",monospace; font-size:11px; color:#cbbdf2; letter-spacing:2px; }
+  .enter-sub{ font-family:"Courier New",monospace; font-size:11px; color:#2e2150; letter-spacing:2px; }
 
-  .hint-bar{ position:relative; z-index:6; text-align:center; padding:14px; font-family:"Courier New",monospace; font-size:13px; color:#cbbdf2; letter-spacing:1px; border-top:1px dashed rgba(203,189,242,.4); }
+  .hint-bar{ position:relative; z-index:6; text-align:center; padding:14px; font-family:"Courier New",monospace; font-size:13px; color:#2e2150; letter-spacing:1px; border-top:1px dashed rgba(46,33,80,.45); }
 
   /* hub */
   .hub{ position:fixed; inset:0; z-index:120; background:rgba(20,12,40,.62); display:none; align-items:center; justify-content:center; padding:18px; }
@@ -190,7 +195,7 @@
 </style>
 </head>
 <body>
-<div class="blobs"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+<div class="blobs"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span><span class="blob b4"></span></div>
 
 <div class="desktop">
 
@@ -202,10 +207,10 @@
       </div>
       <div class="cbody">
         <h4>Curatorial Note</h4>
-        <p>This is a born-digital archive that uses Shah Rukh Khan to look at the early web. He was the most-uploaded face of the era &mdash; scanned onto GeoCities pages, looped into GIFs, re-typed out of magazines &mdash; which makes him an appropriate probe one can measure the web's distortions against.</p>
-        <p>His rise and the web's rise are the same arc. As Khan became the face of Hindi cinema through the 1990s, the internet was reaching India and the South Asian diaspora that loved him &mdash; students, families, workers scattered across the Gulf, Britain, North America &mdash; who built him fan shrines, wallpaper galleries, guestbooks, hand-typed interviews, and traded song translations.</p>
-        <p>Khan was himself an early believer in the web. In November 2000 he <a href="https://www.exchange4media.com/advertising-news/log-on-to-shah-rukhs-srkworld.com-for-bollywood-and-more-3205.html" target="_blank" rel="noopener">launched</a> srkworld.com, an entertainment portal backed with a million dollars and partners including Juhi Chawla, with B4U supplying broadband content. Within a year it was <a href="https://www.bollywoodhungama.com/news/bollywood/shahrukhs-exit-from-srkworld/" target="_blank" rel="noopener">gone</a>, closed as his production company's losses mounted and the dotcom bubble burst, undone by the absence of a workable revenue model.</p>
-        <p class="sig">As the curator I have my own motivations &mdash; twenty-five years on this planet, twenty-five on planet SRK. I was there in the late-2000s googling SRK, collecting countless DVDs of his movies, and watching Om Shanti Om until I lost count. What decayed online is also decaying in me; the internet archive and my memory seem to be collapsing at the same rate.</p>
+        <p>This is a born-digital archive that uses Shah Rukh Khan (srk) to look at the early web. Srk was the most-uploaded face of the era making him an appropriate probe to measure the web's distortions.</p>
+        <p>His rise and the web's rise followed the same arc and as Srk became the face of Hindi cinema through the 1990s, the internet was reaching India and the South Asian diaspora that loved him &mdash; students, families, workers scattered across South Asia, the Gulf, Britain, North America and beyond.</p>
+        <p>Srk was himself an early believer in the web. In November 2000 he <a href="https://www.exchange4media.com/advertising-news/log-on-to-shah-rukhs-srkworld.com-for-bollywood-and-more-3205.html" target="_blank" rel="noopener">launched</a> srkworld.com, an entertainment portal backed with a million dollars and partners including Juhi Chawla, with B4U supplying broadband content. Within a year it was <a href="https://www.bollywoodhungama.com/news/bollywood/shahrukhs-exit-from-srkworld/" target="_blank" rel="noopener">gone</a>, closed as his production company's losses mounted and the dotcom bubble burst, undone by the absence of a workable revenue model.</p>
+        <p class="sig">As the curator of this collection I have my own motivations, twenty-five years on this planet and twenty-five on planet SRK. I was there in the late-2000s googling SRK, collecting countless DVDs of his movies, and watching Om Shanti Om until I lost count. What decayed online is also decaying in me; the internet archive and my memory seem to be collapsing at the same rate.</p>
       </div>
     </div>
 
@@ -217,6 +222,7 @@
         <video src="planetsrk.mp4" loop playsinline controls
           onerror="this.outerHTML='<div class=&quot;vcap&quot;>planetsrk.mp4 &mdash; absent &middot; drop the file next to index.html</div>'"></video>
         <div class="vcap">planetsrk.mp4</div>
+        <p style="font-size:12px;line-height:1.5;color:#5a4a86;margin-top:10px;">PlanetSRK (planetsrk.com) was a fan-built Shah Rukh Khan community site that described itself as a &ldquo;discussion and community fan-site with the latest news, pictures, media files.&rdquo; It was announced out of Boston in April 2006. This YouTube video, sharing the name, is a collection of fan edits.</p>
       </div>
     </div>
   </div>
@@ -225,11 +231,11 @@
 
   <div class="title">
     <div class="titletext">
-      <div class="gtitle">King Khan,<br>Cached
-        <span class="g1" aria-hidden="true">King Khan,<br>Cached</span>
-        <span class="g2" aria-hidden="true">King Khan,<br>Cached</span>
+      <div class="gtitle">King Khan,<br>Katched
+        <span class="g1" aria-hidden="true">King Khan,<br>Katched</span>
+        <span class="g2" aria-hidden="true">King Khan,<br>Katched</span>
       </div>
-      <div class="subtitle">documenting shah rukh khan on the early web &mdash; and the early web through him. 1992&ndash;2007.<br><span style="font-family:'Courier New',monospace;font-size:11px;color:#cbbdf2;">click the disc to enter &middot; drag the title bar to move &middot; drag the corner to resize</span></div>
+      <div class="subtitle">documenting shah rukh khan on the early web &mdash; and the early web through him. 1992&ndash;2007.<br><span style="font-family:'Courier New',monospace;font-size:11px;color:#2e2150;">click the disc to enter &middot; drag the title bar to move &middot; drag the corner to resize</span></div>
     </div>
   </div>
 
@@ -343,13 +349,14 @@
 
 <div class="hub" id="hub">
   <div class="hub-win">
-    <div class="hub-bar"><span>King Khan, Cached &mdash; choose a room</span><button onclick="closeHub()">&#10005;</button></div>
+    <div class="hub-bar"><span>King Khan, Katched &mdash; choose a room</span><button onclick="closeHub()">&#10005;</button></div>
     <div class="hub-body">
-      <h3>two ways in</h3>
-      <p>the early web held shah rukh khan as films an institution catalogued, and as fragments fans made by hand. pick a door.</p>
+      <h3>three ways in</h3>
+      <p>the early web held shah rukh khan as films an institution catalogued, and as fragments fans made by hand &mdash; and scholars are still writing him down. pick a door.</p>
       <div class="rooms">
-        <a class="room" href="films.html"><div class="rg">&#128191;</div><div class="rt">The Record</div><div class="rd">his filmography on the internet archive, all archived in one recent wave</div></a>
-        <a class="room" href="fanweb.html"><div class="rg">&#128190;</div><div class="rt">The Residue</div><div class="rd">a usenet post and three geocities pages, 100 fragments, sorted by how they broke</div></a>
+        <a class="room" href="films.html"><div class="rg">&#128191;</div><div class="rt">The Record</div></a>
+        <a class="room" href="fanweb.html"><div class="rg">&#128190;</div><div class="rt">The Residue</div></a>
+        <a class="room" href="reading.html"><div class="rg">&#128218;</div><div class="rt">The Reading Room</div></a>
       </div>
     </div>
   </div>
