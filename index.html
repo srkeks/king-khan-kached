@@ -4,8 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>King Khan, Katched</title>
-<!-- 3D disc later: uncomment & swap .disc-css for <model-viewer src="disc.glb"> -->
-<!-- <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script> -->
+<script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
 <style>
   * { box-sizing:border-box; margin:0; padding:0; }
   html,body { min-height:100%; }
@@ -153,7 +152,9 @@
   .w-glow{ width:210px; left:51.6%; top:560px; }     /* glow_anim.gif, color bleed */
   .w-glow .body{ aspect-ratio:474/247; }
 
-  /* disc + enter, lower right of scatter */
+  /* GLB window — sits right of the title text */
+  .w-glb{ width:220px; left:52%; top:18px; }
+  .w-glb .body{ aspect-ratio:1/1; background:#1a1030; overflow:visible; }
   .enter-zone{ position:absolute; left:80.6%; top:382px; text-align:center; z-index:20; }
   .enter-disc{ display:inline-flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; background:none; border:none; }
   .disc-frame{ width:170px; aspect-ratio:1; position:relative; }
@@ -185,6 +186,14 @@
   .room:hover{ transform:translate(-2px,-2px); box-shadow:5px 5px 0 #c3b6f5; }
   .room .rg{ font-size:30px; } .room .rt{ color:#4a2f86; font-weight:bold; font-size:15px; margin:6px 0 3px; } .room .rd{ color:#5a4a86; font-size:11px; line-height:1.4; }
   .room.soon{ border-style:dashed; opacity:.7; } .room.soon .rt{ color:#8a6ad6; }
+
+  /* ---- 3D GLB window ---- */
+  .w-glb model-viewer {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    --poster-color: transparent;
+  }
 
   @media(max-width:900px){
     .scatter{ min-height:0; display:flex; flex-wrap:wrap; gap:14px; justify-content:center; padding:16px; }
@@ -331,6 +340,22 @@
       <div class="body"><img src="srk-grid.jpg" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>grid_postcard.jpg<br>&mdash; absent &mdash;</div>'"><div class="cap">postcard</div></div>
     </div>
 
+    <!-- 3D GLB model — desktop window, drag by title bar, orbit inside -->
+    <div class="win w-glb f3" id="win-glb">
+      <div class="bar"><span>ekta_srk.glb</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body">
+        <model-viewer
+          src="ekta_srk.glb"
+          alt="ekta_srk 3D model"
+          auto-rotate
+          camera-controls
+          shadow-intensity="0"
+          exposure="1.15"
+          style="width:100%;height:100%;background:transparent;--poster-color:transparent;"
+        ></model-viewer>
+      </div>
+    </div>
+
     <!-- enter -->
     <div class="enter-zone">
       <button class="enter-disc" onclick="openHub()">
@@ -430,6 +455,7 @@
     if(v.muted){ v.muted=false; v.play(); hint.textContent='\uD83D\uDD0A sound on'; hint.style.color='#a6ffb0'; }
     else{ v.muted=true; hint.textContent='\uD83D\uDD07 click for sound'; hint.style.color='#fff7a6'; }
   }
+
 </script>
 </body>
 </html>
