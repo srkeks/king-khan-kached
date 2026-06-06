@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>King Khan, Cached</title>
+<!-- 3D disc later: uncomment & swap .disc-css for <model-viewer src="disc.glb"> -->
+<!-- <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script> -->
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { min-height:100%; }
+  body {
+    font-family: Verdana, Tahoma, sans-serif; color:#efeaff; overflow-x:hidden;
+    background-color:#6a55a8;
+    background-image:linear-gradient(135deg,#4a3a82,#6a4fb0 25%,#8a6fcc 50%,#a98fe0 70%,#7a5fbe 90%,#5a45a0);
+    background-size:300% 300%; background-attachment:fixed; animation:bgdrift 22s ease-in-out infinite;
+  }
+  @keyframes bgdrift{ 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  body::after{ content:""; position:fixed; inset:0; pointer-events:none; z-index:90;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(20,10,40,.10) 2px 4px);
+    background-size:100% 4px; animation:scan 8s linear infinite; }
+  @keyframes scan{ to{ background-position:0 100px; } }
+
+  .blobs{ position:fixed; inset:0; z-index:-1; overflow:hidden; pointer-events:none; }
+  .blob{ position:absolute; border-radius:50%; filter:blur(70px); opacity:.4; mix-blend-mode:screen; }
+  .blob.b1{ width:460px; height:460px; background:#b79bf0; left:-80px; top:-60px; animation:drift1 26s ease-in-out infinite; }
+  .blob.b2{ width:380px; height:380px; background:#d6c2ff; right:-60px; top:30%; animation:drift2 32s ease-in-out infinite; }
+  .blob.b3{ width:520px; height:520px; background:#7a5fbe; left:30%; bottom:-140px; animation:drift3 30s ease-in-out infinite; }
+  @keyframes drift1{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(120px,80px)} }
+  @keyframes drift2{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(-100px,60px)} }
+  @keyframes drift3{ 0%,100%{transform:translate(0,0)} 50%{transform:translate(80px,-90px)} }
+
+  .desktop{ position:relative; z-index:6; min-height:100vh; }
+
+  .title{ padding:36px 16px 0 48px; display:flex; align-items:flex-start; flex-wrap:wrap; gap:8px; position:relative; z-index:5; pointer-events:none; }
+  .titletext{ display:inline-block; }
+  .gtitle{ position:relative; display:inline-block; font-size:clamp(34px,7vw,72px); font-weight:bold; letter-spacing:1px; line-height:.95; color:#efeaff; }
+  .gtitle .g1,.gtitle .g2{ position:absolute; left:0; top:0; }
+  .gtitle .g1{ color:#ff7ad9; mix-blend-mode:screen; animation:gl1 3.4s steps(2) infinite; }
+  .gtitle .g2{ color:#6fe8ff; mix-blend-mode:screen; animation:gl2 2.9s steps(2) infinite; }
+  @keyframes gl1{0%,92%,100%{transform:translate(0,0)}93%{transform:translate(-3px,1px)}96%{transform:translate(2px,-1px)}}
+  @keyframes gl2{0%,90%,100%{transform:translate(0,0)}91%{transform:translate(3px,-1px)}95%{transform:translate(-2px,1px)}}
+  .subtitle{ color:#e6ddff; font-size:14px; margin-top:14px; line-height:1.5; max-width:440px; }
+
+  .date-oval{ position:absolute; top:42px; right:44px; z-index:40; border:2px solid #d6c2ff; border-radius:50%; padding:6px 16px; font-family:"Courier New",monospace; font-size:12px; color:#efeaff; background:rgba(46,33,80,.4); transform:rotate(5deg); }
+
+  /* curatorial note + extras — fixed top-right column, expandable, does not touch the scatter */
+  .corner{ position:fixed; top:20px; right:20px; z-index:110; width:300px; max-width:calc(100vw - 40px);
+    display:flex; flex-direction:column; gap:10px; }
+  .curnote{ background:#bfb6d8; border:2px solid #efeaff; border-right-color:#5a4a86; border-bottom-color:#5a4a86;
+    box-shadow:5px 5px 0 rgba(0,0,0,.4); font-family:Verdana,Tahoma,sans-serif; }
+  .curnote .cbar{ background:linear-gradient(90deg,#2e2150,#6a4aa8); color:#efeaff; font-size:11px; font-weight:bold;
+    padding:4px 9px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; user-select:none; }
+  .curnote .cbar .ctoggle{ font-family:"Courier New",monospace; }
+  .curnote .cbody{ display:none; background:#f4f1fb; color:#3a2a66; padding:14px 15px; max-height:70vh; overflow:auto;
+    font-size:12px; line-height:1.62; }
+  .curnote.open .cbody{ display:block; }
+  .curnote .cbody h4{ color:#4a2f86; font-size:13px; margin-bottom:9px; letter-spacing:.4px; }
+  .curnote .cbody p{ margin:9px 0; }
+  .curnote .cbody a{ color:#6a3fb0; font-weight:bold; }
+  .curnote .cbody .sig{ color:#7a3fb0; font-style:italic; border-top:1px dotted #c3b6f5; padding-top:9px; margin-top:11px; }
+  .curnote .cbody::-webkit-scrollbar{ width:12px; }
+  /* video panel */
+  .curnote .cbody video{ width:100%; display:block; background:#000; border:1px solid #5a4a86; }
+  .curnote .cbody .vcap{ font-family:"Courier New",monospace; font-size:11px; color:#5a4a86; margin-top:8px; }
+  @media(max-width:900px){ .corner{ position:static; width:auto; margin:12px 16px 0; } .curnote{ box-shadow:4px 4px 0 rgba(0,0,0,.3); } }
+
+  /* music icon */
+  .musicbtn{ display:inline-flex; align-items:center; gap:7px; cursor:pointer; user-select:none; margin:10px 0 0 20px;
+    background:rgba(46,33,80,.55); border:2px solid #d6c2ff; border-radius:20px; padding:7px 14px; color:#efeaff;
+    font-family:"Courier New",monospace; font-size:12px; letter-spacing:1px; transition:.14s; animation:musicfloat 4s ease-in-out infinite; }
+  @keyframes musicfloat{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+  .musicbtn:hover{ background:#4a3580; box-shadow:0 0 16px rgba(214,194,255,.6); }
+  .musicbtn .ico{ font-size:18px; line-height:1; }
+  .musicbtn.ringing .ico{ animation:notebounce .4s ease-in-out infinite; }
+  @keyframes notebounce{ 0%,100%{transform:translateY(0) rotate(-8deg)} 50%{transform:translateY(-3px) rotate(8deg)} }
+  .musicbtn .eq{ display:inline-flex; gap:2px; align-items:flex-end; height:12px; }
+  .musicbtn .eq i{ width:3px; height:3px; background:#d6a6ff; }
+  .musicbtn.ringing .eq i{ animation:eq .8s ease-in-out infinite; }
+  .musicbtn.ringing .eq i:nth-child(2){animation-delay:.2s} .musicbtn.ringing .eq i:nth-child(3){animation-delay:.4s}
+  @keyframes eq{ 0%,100%{height:3px} 50%{height:12px} }
+
+  /* scattered desktop windows */
+  .scatter{ position:relative; z-index:6; min-height:660px; margin-top:-150px; }
+  .win{ position:absolute; background:#bfb6d8; border:2px solid #efeaff; border-right-color:#5a4a86; border-bottom-color:#5a4a86; box-shadow:5px 5px 0 rgba(0,0,0,.4); }
+  .win .bar{ background:linear-gradient(90deg,#2e2150,#6a4aa8); color:#efeaff; font-size:11px; font-weight:bold; padding:3px 7px; display:flex; justify-content:space-between; cursor:grab; }
+  .win .bar:active{ cursor:grabbing; }
+  .win.placed{ animation:none!important; }
+  .win.dragging{ animation:none!important; z-index:50!important; box-shadow:8px 8px 0 rgba(0,0,0,.5); }
+  /* resize grip, bottom-right corner */
+  .win .grip{ position:absolute; right:0; bottom:0; width:16px; height:16px; cursor:nwse-resize; z-index:6;
+    background:linear-gradient(135deg, transparent 0 45%, #efeaff 45% 55%, transparent 55% 70%, #efeaff 70% 80%, transparent 80%);
+    opacity:.7; }
+  .win .grip:hover{ opacity:1; }
+  .win.resizing{ animation:none!important; z-index:50!important; }
+  .win .bar .ctrl{ font-family:"Courier New",monospace; }
+  .win .body{ position:relative; overflow:hidden; background:#1a1030; }
+  .win .body img, .win .body video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .win .cap{ position:absolute; left:5px; bottom:4px; font-family:"Courier New",monospace; font-size:9px; color:#cbe6ff; text-shadow:1px 1px 2px #000; z-index:3; letter-spacing:.5px; }
+  .win .nofile{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; background:repeating-linear-gradient(45deg,#2e2150,#2e2150 10px,#3e2f66 10px,#3e2f66 20px); color:#cbbdf2; font-family:"Courier New",monospace; font-size:10px; padding:12px; }
+  .win:hover{ z-index:35; }
+  /* glitch on the gif window */
+  .win.glitch .gimg{ filter:contrast(1.08) saturate(.9); animation:slice 4.4s steps(1) infinite; }
+  .win.glitch .gr{ position:absolute; inset:0; mix-blend-mode:screen; opacity:.38; filter:hue-rotate(-25deg); animation:rs 3s steps(3) infinite; }
+  .win.glitch .gc{ position:absolute; inset:0; mix-blend-mode:screen; opacity:.32; filter:hue-rotate(120deg); animation:cs 3.5s steps(3) infinite; }
+  @keyframes rs{0%,88%,100%{transform:translate(0,0)}90%{transform:translate(-4px,2px)}94%{transform:translate(3px,-2px)}}
+  @keyframes cs{0%,85%,100%{transform:translate(0,0)}88%{transform:translate(4px,-2px)}92%{transform:translate(-3px,2px)}}
+  @keyframes slice{0%,93%,100%{clip-path:inset(0 0 0 0)}94%{clip-path:inset(42% 0 40% 0);transform:translateX(6px)}95%{clip-path:inset(0 0 0 0)}97%{clip-path:inset(72% 0 14% 0);transform:translateX(-5px)}98%{clip-path:inset(0 0 0 0)}}
+
+  /* float variations */
+  .f1{ animation:fl1 6s ease-in-out infinite; } .f2{ animation:fl2 7s ease-in-out infinite; }
+  .f3{ animation:fl1 6.5s ease-in-out infinite .4s; } .f4{ animation:fl2 7.5s ease-in-out infinite .8s; }
+  .f5{ animation:fl1 8s ease-in-out infinite .2s; } .f6{ animation:fl2 6.8s ease-in-out infinite .6s; }
+  @keyframes fl1{ 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-12px) rotate(1deg)} }
+  @keyframes fl2{ 0%,100%{transform:translateY(0) rotate(1deg)} 50%{transform:translateY(-10px) rotate(-1deg)} }
+  .win:hover{ animation-play-state:paused; }
+
+  /* the video plays its own sound — show a speaker hint */
+  .vidwin .sound{ position:absolute; right:5px; bottom:4px; z-index:3; font-family:"Courier New",monospace; font-size:9px; color:#fff7a6; background:rgba(46,33,80,.7); padding:1px 5px; }
+
+  /* window placements + sizes — FIXED, matched to the reference screenshot */
+  .w-bare{ width:210px; left:33%; top:78px; }        /* still_07.gif, screen grab */
+  .w-bare .body{ aspect-ratio:474/251; }
+  .w-smoke{ width:239px; left:7.2%; top:185px; }     /* srk-smoking.gif, top-left */
+  .w-smoke .body{ aspect-ratio:220/169; }
+  .w-grid{ width:130px; left:86.6%; top:100px; }     /* grid_postcard.jpg, far right */
+  .w-grid .body{ aspect-ratio:736/1094; }
+  .w-video{ width:387px; left:45.1%; top:141px; }    /* badshaah.mp4, biggest */
+  .w-video .body{ aspect-ratio:16/9; }
+  .w-smile{ width:186px; left:70.9%; top:171px; }    /* interview.gif, frozen clip */
+  .w-smile .body{ aspect-ratio:220/182; }
+  .w-lying{ width:252px; left:26%; top:225px; }      /* rest.gif, low res */
+  .w-lying .body{ aspect-ratio:220/146; }
+  .w-striped{ width:145px; left:2.4%; top:293px; }   /* scan_09.jpg, fan scan */
+  .w-striped .body{ aspect-ratio:330/500; }
+  .w-lav{ width:176px; left:13%; top:311px; }        /* shahrukh.jpg, re-uploaded */
+  .w-lav .body{ aspect-ratio:551/838; }
+  .w-dance{ width:310px; left:29.4%; top:393px; }    /* untitled kulfyapp crowd */
+  .w-dance .body{ aspect-ratio:360/303; }
+  .w-heroes{ width:245px; left:47.6%; top:413px; }   /* heroes.gif, dance loop */
+  .w-heroes .body{ aspect-ratio:220/123; }
+  .w-wet{ width:147px; left:65.9%; top:378px; }      /* scan_04.jpg, wet shirt */
+  .w-wet .body{ aspect-ratio:535/838; }
+  .w-city{ width:211px; left:19.1%; top:505px; }     /* newyork.jpg, skyline */
+  .w-city .body{ aspect-ratio:633/527; }
+  .w-point{ width:176px; left:4.4%; top:520px; }     /* point.gif, loop */
+  .w-point .body{ aspect-ratio:220/147; }
+  .w-glow{ width:210px; left:51.6%; top:560px; }     /* glow_anim.gif, color bleed */
+  .w-glow .body{ aspect-ratio:474/247; }
+
+  /* disc + enter, lower right of scatter */
+  .enter-zone{ position:absolute; left:80.6%; top:382px; text-align:center; z-index:20; }
+  .enter-disc{ display:inline-flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; background:none; border:none; }
+  .disc-frame{ width:170px; aspect-ratio:1; position:relative; }
+  .disc-css{ width:100%; height:100%; border-radius:50%; position:relative; overflow:hidden;
+    background:repeating-conic-gradient(from 0deg, #d9c9ff 0 8deg, #b9a6f0 8deg 16deg, #c9b9ff 16deg 24deg), conic-gradient(from 0deg,#cfc0ff,#a98fe6,#d9c9ff,#b9a6f0,#cfc0ff);
+    box-shadow:0 0 0 3px #2e2150, 0 0 22px rgba(160,130,230,.5); animation:spin 8s steps(60) infinite, discflick 5s steps(2) infinite; }
+  @keyframes spin{ to{transform:rotate(360deg)} }
+  .disc-css::before{ content:''; position:absolute; inset:37%; background:#3a2a66; border-radius:50%; border:3px solid #d9c9ff; box-shadow:inset 0 0 0 6px #2e2150; }
+  .disc-css::after{ content:''; position:absolute; inset:0; border-radius:50%; opacity:.25; mix-blend-mode:overlay; background-image:radial-gradient(#000 1px, transparent 1px); background-size:4px 4px; }
+  @keyframes discflick{ 0%,96%,100%{opacity:1; filter:none} 97%{opacity:.6; filter:hue-rotate(20deg) contrast(1.5)} 98%{opacity:1; transform:translateX(3px)} }
+  .enter-disc:hover .disc-css{ box-shadow:0 0 0 3px #2e2150, 0 0 32px rgba(190,166,240,.85); }
+  .enter-label{ font-size:46px; font-weight:bold; letter-spacing:5px; color:#efeaff; text-shadow:-2px 0 0 #ff7ad9, 2px 0 0 #6fe8ff; animation:enterflick 2.4s steps(2) infinite; }
+  @keyframes enterflick{ 0%,94%,100%{opacity:1} 95%{opacity:.4} 96%{opacity:1} }
+  .enter-sub{ font-family:"Courier New",monospace; font-size:11px; color:#cbbdf2; letter-spacing:2px; }
+
+  .hint-bar{ position:relative; z-index:6; text-align:center; padding:14px; font-family:"Courier New",monospace; font-size:13px; color:#cbbdf2; letter-spacing:1px; border-top:1px dashed rgba(203,189,242,.4); }
+
+  /* hub */
+  .hub{ position:fixed; inset:0; z-index:120; background:rgba(20,12,40,.62); display:none; align-items:center; justify-content:center; padding:18px; }
+  .hub.open{ display:flex; }
+  .hub-win{ background:#bfb6d8; border:2px solid #efeaff; border-right-color:#5a4a86; border-bottom-color:#5a4a86; box-shadow:8px 8px 0 rgba(0,0,0,.5); max-width:720px; width:100%; }
+  .hub-bar{ background:linear-gradient(90deg,#2e2150,#6a4aa8); color:#efeaff; font-weight:bold; font-size:13px; padding:5px 10px; display:flex; justify-content:space-between; }
+  .hub-bar button{ background:#bfb6d8; border:2px solid #efeaff; border-right-color:#5a4a86; border-bottom-color:#5a4a86; cursor:pointer; font-family:"Courier New",monospace; padding:0 8px; }
+  .hub-body{ background:#f4f1fb; padding:24px; color:#3a2a66; }
+  .hub-body h3{ color:#4a2f86; font-size:22px; }
+  .hub-body p{ color:#5a4a86; font-size:13px; line-height:1.55; margin:8px 0 18px; max-width:600px; }
+  .rooms{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; }
+  .room{ display:block; text-decoration:none; border:2px solid #8a72d6; background:#fff; padding:16px; transition:.12s; }
+  .room:hover{ transform:translate(-2px,-2px); box-shadow:5px 5px 0 #c3b6f5; }
+  .room .rg{ font-size:30px; } .room .rt{ color:#4a2f86; font-weight:bold; font-size:15px; margin:6px 0 3px; } .room .rd{ color:#5a4a86; font-size:11px; line-height:1.4; }
+  .room.soon{ border-style:dashed; opacity:.7; } .room.soon .rt{ color:#8a6ad6; }
+
+  @media(max-width:900px){
+    .scatter{ min-height:0; display:flex; flex-wrap:wrap; gap:14px; justify-content:center; padding:16px; }
+    .win{ position:static!important; width:44%!important; animation:none; }
+    .enter-zone{ position:static; margin:10px auto; }
+    .date-oval{ display:none; }
+  }
+</style>
+</head>
+<body>
+<div class="blobs"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+
+<div class="desktop">
+
+  <!-- curatorial note + planetsrk: fixed top-right column, each expandable; does not affect the scatter layout -->
+  <div class="corner">
+    <div class="curnote" id="curnote">
+      <div class="cbar" onclick="(function(n){n.classList.toggle('open');n.querySelector('.ctoggle').textContent=n.classList.contains('open')?'[\u2013]':'[+]';})(document.getElementById('curnote'))">
+        <span>&#9656; curatorial note</span><span class="ctoggle">[+]</span>
+      </div>
+      <div class="cbody">
+        <h4>Curatorial Note</h4>
+        <p>This is a born-digital archive that uses Shah Rukh Khan to look at the early web. He was the most-uploaded face of the era &mdash; scanned onto GeoCities pages, looped into GIFs, re-typed out of magazines &mdash; which makes him an appropriate probe one can measure the web's distortions against.</p>
+        <p>His rise and the web's rise are the same arc. As Khan became the face of Hindi cinema through the 1990s, the internet was reaching India and the South Asian diaspora that loved him &mdash; students, families, workers scattered across the Gulf, Britain, North America &mdash; who built him fan shrines, wallpaper galleries, guestbooks, hand-typed interviews, and traded song translations.</p>
+        <p>Khan was himself an early believer in the web. In November 2000 he <a href="https://www.exchange4media.com/advertising-news/log-on-to-shah-rukhs-srkworld.com-for-bollywood-and-more-3205.html" target="_blank" rel="noopener">launched</a> srkworld.com, an entertainment portal backed with a million dollars and partners including Juhi Chawla, with B4U supplying broadband content. Within a year it was <a href="https://www.bollywoodhungama.com/news/bollywood/shahrukhs-exit-from-srkworld/" target="_blank" rel="noopener">gone</a>, closed as his production company's losses mounted and the dotcom bubble burst, undone by the absence of a workable revenue model.</p>
+        <p class="sig">As the curator I have my own motivations &mdash; twenty-five years on this planet, twenty-five on planet SRK. I was there in the late-2000s googling SRK, collecting countless DVDs of his movies, and watching Om Shanti Om until I lost count. What decayed online is also decaying in me; the internet archive and my memory seem to be collapsing at the same rate.</p>
+      </div>
+    </div>
+
+    <div class="curnote" id="planetsrk">
+      <div class="cbar" onclick="(function(n){n.classList.toggle('open');n.querySelector('.ctoggle').textContent=n.classList.contains('open')?'[\u2013]':'[+]';var v=n.querySelector('video');if(v){if(n.classList.contains('open')){v.play();}else{v.pause();}}})(document.getElementById('planetsrk'))">
+        <span>&#9656; planetsrk</span><span class="ctoggle">[+]</span>
+      </div>
+      <div class="cbody">
+        <video src="planetsrk.mp4" loop playsinline controls
+          onerror="this.outerHTML='<div class=&quot;vcap&quot;>planetsrk.mp4 &mdash; absent &middot; drop the file next to index.html</div>'"></video>
+        <div class="vcap">planetsrk.mp4</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="title">
+    <div class="titletext">
+      <div class="gtitle">King Khan,<br>Cached
+        <span class="g1" aria-hidden="true">King Khan,<br>Cached</span>
+        <span class="g2" aria-hidden="true">King Khan,<br>Cached</span>
+      </div>
+      <div class="subtitle">documenting shah rukh khan on the early web &mdash; and the early web through him. 1992&ndash;2007.<br><span style="font-family:'Courier New',monospace;font-size:11px;color:#cbbdf2;">click the disc to enter &middot; drag the title bar to move &middot; drag the corner to resize</span></div>
+    </div>
+  </div>
+
+  <div class="scatter">
+    <!-- biggest: video, plays own sound on click -->
+    <div class="win vidwin w-video f2">
+      <div class="bar"><span>badshaah.mp4</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body" onclick="toggleVideo(this.closest('.win'))">
+        <video src="badshaah.mp4" autoplay loop muted playsinline
+          onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>badshaah.mp4<br>&mdash; video absent &mdash;</div>'"></video>
+        <div class="sound" data-on="false">&#128263; click for sound</div>
+      </div>
+    </div>
+
+    <!-- glitching smoking gif -->
+    <div class="win glitch w-smoke f1">
+      <div class="bar"><span>srk-smoking.gif</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body">
+        <img class="gimg" src="srk-smoking.jpg" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>srk-smoking.gif<br>&mdash; absent &mdash;</div>'">
+        <img class="gr" src="srk-smoking.jpg" alt="" aria-hidden="true">
+        <img class="gc" src="srk-smoking.jpg" alt="" aria-hidden="true">
+        <div class="cap">poor image &middot; re-uploaded</div>
+      </div>
+    </div>
+
+    <!-- dance gif -->
+    <div class="win w-dance f3">
+      <div class="bar"><span>chaiyya.gif</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body">
+        <img src="srk-dance.gif" alt="srk dancing" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>srk-dance.gif<br>&mdash; absent &mdash;</div>'">
+        <div class="cap">looping forever</div>
+      </div>
+    </div>
+
+    <!-- smile gif -->
+    <div class="win w-smile f6">
+      <div class="bar"><span>interview.gif</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body">
+        <img src="srk-smile.gif" alt="srk smiling" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>srk-smile.gif<br>&mdash; absent &mdash;</div>'">
+        <div class="cap">frozen clip</div>
+      </div>
+    </div>
+
+    <!-- wet scan -->
+    <div class="win w-wet f4">
+      <div class="bar"><span>scan_04.jpg</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body">
+        <img src="srk-wet.jpg" alt="srk scan" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>scan_04.jpg<br>&mdash; absent &mdash;</div>'">
+        <div class="cap">fan scan</div>
+      </div>
+    </div>
+
+    <!-- lavender scan -->
+    <div class="win w-lav f5">
+      <div class="bar"><span>shahrukh.jpg</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body">
+        <img src="srk-lavender.jpg" alt="srk scan" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>shahrukh.jpg<br>&mdash; absent &mdash;</div>'">
+        <div class="cap">postcard</div>
+      </div>
+    </div>
+
+    <!-- 8 new windows -->
+    <div class="win w-glow f2">
+      <div class="bar"><span>glow_anim.gif</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body"><img src="srk-glow.webp" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>glow_anim.gif<br>&mdash; absent &mdash;</div>'"><div class="cap">color bleed</div></div>
+    </div>
+    <div class="win w-bare f3">
+      <div class="bar"><span>still_07.gif</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body"><img src="srk-bare.jpeg" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>still_07.gif<br>&mdash; absent &mdash;</div>'"><div class="cap">screen grab</div></div>
+    </div>
+    <div class="win w-point f1">
+      <div class="bar"><span>point.gif</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body"><img src="srk-point.gif" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>point.gif<br>&mdash; absent &mdash;</div>'"><div class="cap">loop</div></div>
+    </div>
+    <div class="win w-lying f4">
+      <div class="bar"><span>rest.gif</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body"><img src="srk-lying.gif" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>rest.gif<br>&mdash; absent &mdash;</div>'"><div class="cap">low res</div></div>
+    </div>
+    <div class="win w-heroes f5">
+      <div class="bar"><span>heroes.gif</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body"><img src="srk-heroes.gif" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>heroes.gif<br>&mdash; absent &mdash;</div>'"><div class="cap">dance loop</div></div>
+    </div>
+    <div class="win w-city f6">
+      <div class="bar"><span>newyork.jpg</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body"><img src="srk-city.jpg" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>newyork.jpg<br>&mdash; absent &mdash;</div>'"><div class="cap">skyline</div></div>
+    </div>
+    <div class="win w-striped f1">
+      <div class="bar"><span>scan_09.jpg</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body"><img src="srk-striped.jpg" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>scan_09.jpg<br>&mdash; absent &mdash;</div>'"><div class="cap">fan scan</div></div>
+    </div>
+    <div class="win w-grid f2">
+      <div class="bar"><span>grid_postcard.jpg</span><span class="ctrl">_ &#9633; &#10005;</span></div>
+      <div class="body"><img src="srk-grid.jpg" alt="srk" onerror="this.parentNode.innerHTML='<div class=&quot;nofile&quot;>grid_postcard.jpg<br>&mdash; absent &mdash;</div>'"><div class="cap">postcard</div></div>
+    </div>
+
+    <!-- enter -->
+    <div class="enter-zone">
+      <button class="enter-disc" onclick="openHub()">
+        <div class="disc-frame">
+          <!-- swap for <model-viewer src="disc.glb" auto-rotate camera-controls disable-zoom style="width:100%;height:100%"></model-viewer> -->
+          <div class="disc-css"></div>
+        </div>
+        <div class="enter-label">ENTER</div>
+        <div class="enter-sub">&#9656; click the disc to begin</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="hint-bar">best viewed with tolerance for broken links &#10022;</div>
+</div>
+
+<div class="hub" id="hub">
+  <div class="hub-win">
+    <div class="hub-bar"><span>King Khan, Cached &mdash; choose a room</span><button onclick="closeHub()">&#10005;</button></div>
+    <div class="hub-body">
+      <h3>two ways in</h3>
+      <p>the early web held shah rukh khan as films an institution catalogued, and as fragments fans made by hand. pick a door.</p>
+      <div class="rooms">
+        <a class="room" href="films.html"><div class="rg">&#128191;</div><div class="rt">The Record</div><div class="rd">his filmography on the internet archive, all archived in one recent wave</div></a>
+        <a class="room" href="fanweb.html"><div class="rg">&#128190;</div><div class="rt">The Residue</div><div class="rd">a usenet post and three geocities pages, 100 fragments, sorted by how they broke</div></a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openHub(){ document.getElementById('hub').classList.add('open'); }
+  function closeHub(){ document.getElementById('hub').classList.remove('open'); }
+  document.getElementById('hub').addEventListener('click',function(e){ if(e.target.id==='hub') closeHub(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeHub(); });
+
+  // ---- draggable + resizable windows ----
+  (function(){
+    var scatter=document.querySelector('.scatter');
+
+    // give every window a resize grip
+    document.querySelectorAll('.win').forEach(function(win){
+      var g=document.createElement('div'); g.className='grip'; win.appendChild(g);
+      g.addEventListener('pointerdown', function(e){
+        var srect=scatter.getBoundingClientRect(), wrect=win.getBoundingClientRect();
+        win.classList.add('placed');
+        win.style.left=(wrect.left-srect.left)+'px';
+        win.style.top=(wrect.top-srect.top)+'px';
+        win.style.right='auto';
+        win.classList.add('resizing');
+        var startX=e.clientX, startW=wrect.width;
+        function move(ev){
+          var w=Math.max(110, Math.min(560, startW+(ev.clientX-startX)));
+          win.style.width=w+'px';
+        }
+        function up(ev){ win.classList.remove('resizing'); g.releasePointerCapture(e.pointerId);
+          g.removeEventListener('pointermove',move); g.removeEventListener('pointerup',up); }
+        g.setPointerCapture(e.pointerId);
+        g.addEventListener('pointermove',move); g.addEventListener('pointerup',up);
+        e.preventDefault(); e.stopPropagation();
+      });
+    });
+
+    var dragWin=null, offX=0, offY=0;
+    document.querySelectorAll('.win .bar').forEach(function(bar){
+      bar.addEventListener('pointerdown', function(e){
+        var win=bar.closest('.win');
+        var srect=scatter.getBoundingClientRect(), wrect=win.getBoundingClientRect();
+        win.classList.add('placed');
+        win.style.left=(wrect.left-srect.left)+'px';
+        win.style.top=(wrect.top-srect.top)+'px';
+        win.style.right='auto';
+        dragWin=win;
+        offX=e.clientX-wrect.left; offY=e.clientY-wrect.top;
+        win.classList.add('dragging');
+        bar.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      });
+      bar.addEventListener('pointermove', function(e){
+        if(!dragWin) return;
+        var srect=scatter.getBoundingClientRect();
+        var nx=e.clientX-srect.left-offX, ny=e.clientY-srect.top-offY;
+        nx=Math.max(0, Math.min(nx, scatter.clientWidth-40));
+        ny=Math.max(0, Math.min(ny, scatter.clientHeight-30));
+        dragWin.style.left=nx+'px'; dragWin.style.top=ny+'px';
+      });
+      bar.addEventListener('pointerup', function(e){
+        if(dragWin){ dragWin.classList.remove('dragging'); dragWin=null; }
+      });
+    });
+  })();
+
+  // video -> unmute on click (plays its own sound).
+  function toggleVideo(win){
+    var v=win.querySelector('video'); var hint=win.querySelector('.sound'); if(!v) return;
+    if(v.muted){ v.muted=false; v.play(); hint.textContent='\uD83D\uDD0A sound on'; hint.style.color='#a6ffb0'; }
+    else{ v.muted=true; hint.textContent='\uD83D\uDD07 click for sound'; hint.style.color='#fff7a6'; }
+  }
+</script>
+</body>
+</html>
