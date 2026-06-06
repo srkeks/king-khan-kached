@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>King Khan, Cached — Dialogue.exe</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html,body { min-height:100%; }
+  body {
+    font-family: Verdana, Tahoma, sans-serif;
+    color:#1d1b4f;
+    overflow-x:hidden;
+    background-color:#dcd6ff;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(255,255,255,.8) 1px, transparent 2px),
+      radial-gradient(circle at 80% 30%, rgba(173,216,255,.7) 1px, transparent 2px),
+      radial-gradient(circle at 40% 80%, rgba(255,255,255,.7) 1px, transparent 2px),
+      linear-gradient(to bottom,#d8d1ff,#c8dfff,#eef3ff);
+    background-size:120px 120px,160px 160px,140px 140px,100% 100%;
+  }
+  body::after {
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:90;
+    opacity:.24;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0 2px, rgba(29,27,79,.18) 2px 4px);
+  }
+  .page { max-width:1120px; margin:22px auto 60px; padding:0 16px; position:relative; z-index:2; }
+
+  .topnav { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+  .btn {
+    background:linear-gradient(to bottom,#d8d2ff,#aaa0ff);
+    color:#1d1b4f;
+    padding:9px 14px;
+    border:2px outset #f1eeff;
+    font-size:13px;
+    font-weight:bold;
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .btn:hover { background:linear-gradient(to bottom,#c6edff,#9fc7ff); color:#5424a7; }
+  .btn.here { background:linear-gradient(to bottom,#1d1b4f,#5d4ecb); color:#fff; }
+
+  .head {
+    background:#fdfcff;
+    border:4px double #5d4ecb;
+    box-shadow:8px 8px 0 #a9a2ea;
+    padding:24px;
+    margin-bottom:18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .head::before {
+    content:"DIALOGUE.EXE";
+    position:absolute;
+    right:-22px;
+    top:12px;
+    transform:rotate(10deg);
+    color:rgba(93,78,203,.11);
+    font-size:70px;
+    font-family:"Courier New",monospace;
+    font-weight:bold;
+    letter-spacing:2px;
+  }
+  .head h1 {
+    position:relative;
+    font-size:clamp(34px,6vw,58px);
+    color:#4d3db5;
+    text-shadow:2px 2px #d8d2ff;
+    letter-spacing:1px;
+    line-height:.95;
+  }
+  .head p {
+    position:relative;
+    max-width:820px;
+    font-size:14px;
+    line-height:1.65;
+    color:#382d6d;
+    margin-top:12px;
+  }
+  .stamp {
+    display:inline-block;
+    background:#ece6ff;
+    color:#513ca8;
+    border:2px solid #513ca8;
+    padding:4px 10px;
+    font-size:12px;
+    font-weight:bold;
+    margin-top:14px;
+    font-family:"Courier New",monospace;
+  }
+
+  .layout { display:grid; grid-template-columns:minmax(0,1fr) 310px; gap:18px; align-items:start; }
+
+  .game-window, .side-window {
+    background:#c0c0c0;
+    border:2px solid #fff;
+    border-right-color:#606060;
+    border-bottom-color:#606060;
+    box-shadow:6px 6px 0 rgba(0,0,0,.34);
+  }
+  .bar {
+    background:linear-gradient(90deg,#1d1b4f,#5d4ecb);
+    color:#fff;
+    font-size:12px;
+    font-weight:bold;
+    padding:5px 9px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:Verdana,Tahoma,sans-serif;
+  }
+  .ctrl { font-family:"Courier New",monospace; opacity:.9; }
+  .screen { background:#fdfcff; padding:20px; min-height:530px; position:relative; overflow:hidden; }
+
+  .status-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .stat {
+    border:2px inset #f1eeff;
+    background:#ece6ff;
+    padding:8px;
+    font-family:"Courier New",monospace;
+    color:#382d6d;
+    font-size:12px;
+    min-height:48px;
+  }
+  .stat b { color:#4d3db5; display:block; font-size:14px; margin-top:3px; }
+
+  .progress-shell {
+    height:18px;
+    border:2px inset #fff;
+    background:#d8d2ff;
+    margin-bottom:18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .progress-bar {
+    width:0%;
+    height:100%;
+    background:repeating-linear-gradient(45deg,#5d4ecb,#5d4ecb 8px,#9a6ae0 8px,#9a6ae0 16px);
+    transition:width .4s ease;
+  }
+  .progress-label {
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#1d1b4f;
+    font-size:11px;
+    font-family:"Courier New",monospace;
+    text-shadow:1px 1px #fff;
+  }
+
+  .quote-card {
+    border:4px double #5d4ecb;
+    background:#fff9d9;
+    padding:22px;
+    margin:16px 0;
+    min-height:170px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    box-shadow:4px 4px 0 #d8d2ff;
+  }
+  .quote-card::before {
+    content:"saved line fragment";
+    position:absolute;
+    top:-12px;
+    left:14px;
+    background:#fdfcff;
+    border:1px solid #7b6be6;
+    color:#5d4ecb;
+    padding:2px 7px;
+    font-size:11px;
+    font-family:"Courier New",monospace;
+  }
+  .quote {
+    font-size:clamp(23px,4vw,38px);
+    line-height:1.22;
+    color:#382d6d;
+    font-weight:bold;
+    letter-spacing:.2px;
+  }
+  .translit {
+    margin-top:12px;
+    font-family:"Courier New",monospace;
+    font-size:12px;
+    color:#6b5d9f;
+  }
+
+  .choices-title {
+    font-family:"Courier New",monospace;
+    font-size:12px;
+    color:#5d5c83;
+    margin:18px 0 9px;
+    text-transform:uppercase;
+    letter-spacing:.8px;
+  }
+  #choices { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .file-option {
+    text-align:left;
+    min-height:74px;
+    background:#ece6ff;
+    border:2px outset #f1eeff;
+    padding:12px 12px 12px 46px;
+    color:#1d1b4f;
+    cursor:pointer;
+    font-family:"Courier New",monospace;
+    font-weight:bold;
+    font-size:13px;
+    position:relative;
+    transition:transform .12s, box-shadow .12s, background .12s;
+  }
+  .file-option::before {
+    content:"📁";
+    position:absolute;
+    left:12px;
+    top:13px;
+    font-size:24px;
+  }
+  .file-option small {
+    display:block;
+    font-weight:normal;
+    color:#5d5c83;
+    margin-top:5px;
+    font-size:11px;
+  }
+  .file-option:hover:not(:disabled) {
+    background:#fff9d9;
+    transform:translate(-2px,-2px);
+    box-shadow:4px 4px 0 #a9a2ea;
+  }
+  .file-option:disabled { cursor:default; opacity:.75; }
+  .file-option.correct-choice {
+    background:#dcffe9;
+    border-color:#2d8a57;
+    color:#165234;
+  }
+  .file-option.wrong-choice {
+    background:#ffe0f0;
+    border-color:#b54b82;
+    color:#6b1641;
+  }
+
+  .result-box {
+    margin-top:16px;
+    border:2px dashed #7b6be6;
+    background:#f7f4ff;
+    min-height:82px;
+    padding:12px;
+    font-family:"Courier New",monospace;
+    color:#382d6d;
+    line-height:1.45;
+  }
+  .result-box .ok { color:#2d8a57; font-weight:bold; }
+  .result-box .bad { color:#b54b82; font-weight:bold; }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; margin-top:14px; }
+  .action-btn {
+    background:linear-gradient(to bottom,#fff,#d8d2ff);
+    border:2px outset #f1eeff;
+    padding:9px 13px;
+    color:#1d1b4f;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:12px;
+    font-family:Verdana,Tahoma,sans-serif;
+  }
+  .action-btn:hover { background:#fff9d9; }
+  .action-btn.primary { background:linear-gradient(to bottom,#5d4ecb,#1d1b4f); color:white; }
+  .action-btn:disabled { opacity:.45; cursor:not-allowed; }
+
+  .side-body { background:#fdfcff; padding:14px; }
+  .side-body h3 { color:#4d3db5; font-size:16px; margin-bottom:8px; }
+  .side-body p { color:#5d5c83; font-size:12px; line-height:1.55; margin-bottom:10px; }
+  .log {
+    list-style:none;
+    margin-top:12px;
+    max-height:280px;
+    overflow:auto;
+    border:2px inset #f1eeff;
+    background:#1d1b4f;
+    color:#cfe6ff;
+    font-family:"Courier New",monospace;
+    font-size:11px;
+    padding:8px;
+    line-height:1.45;
+  }
+  .log li { border-bottom:1px dotted rgba(207,230,255,.25); padding:6px 0; }
+  .log li:last-child { border-bottom:0; }
+  .mini-list { margin:10px 0 0; display:flex; flex-wrap:wrap; gap:6px; }
+  .chip {
+    font-family:"Courier New",monospace;
+    font-size:11px;
+    border:1px solid #7b6be6;
+    background:#ece6ff;
+    padding:3px 6px;
+    color:#513ca8;
+  }
+
+  .final {
+    border:4px double #5d4ecb;
+    background:#fff9d9;
+    padding:24px;
+    text-align:center;
+    box-shadow:5px 5px 0 #d8d2ff;
+  }
+  .final h2 { color:#4d3db5; font-size:34px; margin-bottom:8px; }
+  .final p { color:#382d6d; line-height:1.55; margin:9px auto; max-width:560px; }
+  .final .big-score { font-family:"Courier New",monospace; font-size:42px; color:#1d1b4f; margin:12px 0; }
+
+  footer {
+    background:#fdfcff;
+    border:3px solid #7b6be6;
+    padding:14px;
+    text-align:center;
+    font-size:13px;
+    color:#5d5c83;
+    margin-top:22px;
+  }
+
+  body.correct-flash .quote-card { animation:restore .55s ease; }
+  body.wrong-flash .quote-card { animation:glitch .4s steps(2); }
+  body.wrong-flash { animation:wrongTint .35s; }
+  @keyframes restore {
+    0% { filter:blur(2px) brightness(1.2); transform:scale(.99); }
+    60% { filter:none; transform:scale(1.015); }
+    100% { transform:scale(1); }
+  }
+  @keyframes glitch {
+    0%,100% { transform:translate(0,0); filter:none; }
+    20% { transform:translate(-6px,2px); filter:hue-rotate(80deg) contrast(1.8); }
+    40% { transform:translate(5px,-3px); filter:blur(1px) contrast(2); }
+    70% { transform:translate(-2px,1px); filter:saturate(.3); }
+  }
+  @keyframes wrongTint {
+    0%,100% { background-color:#dcd6ff; }
+    50% { background-color:#ffd7ee; }
+  }
+
+  @media(max-width:850px){
+    .layout { grid-template-columns:1fr; }
+    .status-grid { grid-template-columns:1fr; }
+    #choices { grid-template-columns:1fr; }
+    .screen { min-height:auto; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="topnav">
+    <a class="btn" href="index.html">desktop</a>
+    <a class="btn" href="films.html">the record (films)</a>
+    <a class="btn" href="fanweb.html">the residue (fan web)</a>
+    <a class="btn here" href="#">dialogue.exe</a>
+  </div>
+
+  <div class="head">
+    <h1>Dialogue.exe</h1>
+    <p>SRK’s films survive as files. His dialogues survive as memory, ringtone, caption, meme, and misquote. Match the line back to the movie before the cache glitches.</p>
+    <div class="stamp" id="stamp">10 fragments loaded · recognition test ready</div>
+  </div>
+
+  <div class="layout">
+    <main class="game-window">
+      <div class="bar"><span>DIALOGUE.EXE — match movie to line</span><span class="ctrl">_ □ ✕</span></div>
+      <div class="screen" id="screen">
+        <div class="status-grid">
+          <div class="stat">score<b id="score">0 / 10</b></div>
+          <div class="stat">fragment<b id="round">1 / 10</b></div>
+          <div class="stat">machine confidence<b id="confidence">0%</b></div>
+        </div>
+
+        <div class="progress-shell">
+          <div class="progress-bar" id="progressBar"></div>
+          <div class="progress-label" id="progressLabel">archive scan: 0%</div>
+        </div>
+
+        <section class="quote-card" id="quoteCard">
+          <div class="quote" id="dialogue">Loading dialogue fragment...</div>
+          <div class="translit" id="clue">choose the movie file that remembers this line</div>
+        </section>
+
+        <div class="choices-title">open one movie file:</div>
+        <div id="choices"></div>
+
+        <div class="result-box" id="result">archive log: waiting for your click...</div>
+
+        <div class="actions">
+          <button class="action-btn" id="hintBtn" onclick="showHint()">show metadata clue</button>
+          <button class="action-btn primary" id="nextBtn" onclick="nextQuestion()" disabled>next fragment</button>
+          <button class="action-btn" onclick="restartGame()">restart / reshuffle</button>
+        </div>
+      </div>
+    </main>
+
+    <aside class="side-window">
+      <div class="bar"><span>README.TXT</span><span class="ctrl">_ □ ✕</span></div>
+      <div class="side-body">
+        <h3>How to play</h3>
+        <p>Click the movie that matches the dialogue. A correct click restores the fragment. A wrong click opens the wrong file and glitches the cache.</p>
+        <p>The questions live inside the JavaScript at the bottom of this file, so you can add more dialogues later.</p>
+        <div class="mini-list">
+          <span class="chip">DDLJ</span>
+          <span class="chip">Baazigar</span>
+          <span class="chip">Darr</span>
+          <span class="chip">Devdas</span>
+          <span class="chip">Don</span>
+          <span class="chip">Chak De</span>
+        </div>
+        <ul class="log" id="log">
+          <li>system: dialogue fragments waiting to be matched.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+
+  <footer>✦ a line is a file fans keep replaying from memory ✦</footer>
+</div>
+
+<script>
+// Edit this list to add/remove questions. Keep each dialogue short so it feels like a fragment.
+const ALL_QUESTIONS = [
+  {
+    dialogue: "Bade bade deshon mein aisi chhoti chhoti baatein hoti rehti hain.",
+    answer: "Dilwale Dulhania Le Jayenge",
+    choices: ["Dilwale Dulhania Le Jayenge", "Kabhi Khushi Kabhie Gham", "Dil To Pagal Hai", "Mohabbatein"],
+    year: "1995",
+    note: "DDLJ turns this line into a comfort phrase, almost like a fan password."
+  },
+  {
+    dialogue: "Rahul, naam toh suna hoga.",
+    answer: "Dil To Pagal Hai",
+    choices: ["Dil To Pagal Hai", "Kuch Kuch Hota Hai", "Yes Boss", "Pardes"],
+    year: "1997",
+    note: "A tiny self-introduction that became bigger than the scene itself."
+  },
+  {
+    dialogue: "K... K... Kiran.",
+    answer: "Darr",
+    choices: ["Darr", "Baazigar", "Anjaam", "Duplicate"],
+    year: "1993",
+    note: "The stutter works like an audio mark. The movie is remembered by how the name is said."
+  },
+  {
+    dialogue: "Haar kar jeetne wale ko Baazigar kehte hain.",
+    answer: "Baazigar",
+    choices: ["Baazigar", "Darr", "Ram Jaane", "Koyla"],
+    year: "1993",
+    note: "This line turns defeat into a star-making pose."
+  },
+  {
+    dialogue: "Love is friendship.",
+    answer: "Kuch Kuch Hota Hai",
+    choices: ["Kuch Kuch Hota Hai", "Dil Se", "Chalte Chalte", "Mohabbatein"],
+    year: "1998",
+    note: "A whole romantic philosophy compressed into three English words."
+  },
+  {
+    dialogue: "Kaun kambakht bardaasht karne ko peeta hai?",
+    answer: "Devdas",
+    choices: ["Devdas", "Asoka", "Paheli", "Swades"],
+    year: "2002",
+    note: "The line survives as melodrama, voice, and gesture."
+  },
+  {
+    dialogue: "Main hoon na.",
+    answer: "Main Hoon Na",
+    choices: ["Main Hoon Na", "Kal Ho Naa Ho", "Kabhi Alvida Naa Kehna", "Josh"],
+    year: "2004",
+    note: "The title itself becomes the reassurance."
+  },
+  {
+    dialogue: "Don ko pakadna mushkil hi nahin, namumkin hai.",
+    answer: "Don",
+    choices: ["Don", "Baadshah", "Duplicate", "Ra.One"],
+    year: "2006",
+    note: "A recycled iconic line becomes a new SRK file in the archive."
+  },
+  {
+    dialogue: "Sattar minute.",
+    answer: "Chak De! India",
+    choices: ["Chak De! India", "Swades", "Kabhi Alvida Naa Kehna", "Om Shanti Om"],
+    year: "2007",
+    note: "Just two words, but the whole speech is cached behind them."
+  },
+  {
+    dialogue: "Picture abhi baaki hai, mere dost.",
+    answer: "Om Shanti Om",
+    choices: ["Om Shanti Om", "Don", "Kal Ho Naa Ho", "Paheli"],
+    year: "2007",
+    note: "A film line that also describes the archive: unfinished, still loading."
+  }
+];
+
+let questions = [];
+let current = 0;
+let score = 0;
+let answered = false;
+let usedHint = false;
+
+const dialogueEl = document.getElementById("dialogue");
+const clueEl = document.getElementById("clue");
+const choicesEl = document.getElementById("choices");
+const resultEl = document.getElementById("result");
+const scoreEl = document.getElementById("score");
+const roundEl = document.getElementById("round");
+const confidenceEl = document.getElementById("confidence");
+const progressBar = document.getElementById("progressBar");
+const progressLabel = document.getElementById("progressLabel");
+const nextBtn = document.getElementById("nextBtn");
+const hintBtn = document.getElementById("hintBtn");
+const logEl = document.getElementById("log");
+const stampEl = document.getElementById("stamp");
+
+function shuffle(array){
+  const copy = [...array];
+  for(let i=copy.length-1; i>0; i--){
+    const j = Math.floor(Math.random() * (i+1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function fileName(movie){
+  return movie
+    .replace(/[^a-z0-9]+/gi,"_")
+    .replace(/^_+|_+$/g,"")
+    .toUpperCase() + ".EXE";
+}
+
+function addLog(text){
+  const li = document.createElement("li");
+  li.textContent = text;
+  logEl.prepend(li);
+}
+
+function updateStats(){
+  const total = questions.length;
+  const completed = Math.min(current, total);
+  const confidence = total ? Math.round((score / total) * 100) : 0;
+  const scan = total ? Math.round((completed / total) * 100) : 0;
+  scoreEl.textContent = `${score} / ${total}`;
+  roundEl.textContent = `${Math.min(current + 1, total)} / ${total}`;
+  confidenceEl.textContent = `${confidence}%`;
+  progressBar.style.width = `${scan}%`;
+  progressLabel.textContent = `archive scan: ${scan}%`;
+}
+
+function renderQuestion(){
+  answered = false;
+  usedHint = false;
+  nextBtn.disabled = true;
+  hintBtn.disabled = false;
+
+  const q = questions[current];
+  dialogueEl.textContent = `“${q.dialogue}”`;
+  clueEl.textContent = "choose the movie file that remembers this line";
+  resultEl.textContent = "archive log: waiting for your click...";
+  choicesEl.innerHTML = "";
+
+  shuffle(q.choices).forEach(choice => {
+    const btn = document.createElement("button");
+    btn.className = "file-option";
+    btn.innerHTML = `${fileName(choice)}<small>${choice}</small>`;
+    btn.onclick = () => checkAnswer(choice, btn);
+    choicesEl.appendChild(btn);
+  });
+  updateStats();
+}
+
+function checkAnswer(choice, clickedBtn){
+  if(answered) return;
+  answered = true;
+  hintBtn.disabled = true;
+
+  const q = questions[current];
+  const buttons = document.querySelectorAll(".file-option");
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    if(btn.textContent.includes(q.answer)) btn.classList.add("correct-choice");
+  });
+
+  if(choice === q.answer){
+    score++;
+    clickedBtn.classList.add("correct-choice");
+    resultEl.innerHTML = `<span class="ok">correct file opened:</span> ${q.answer} (${q.year})<br>${q.note}`;
+    document.body.classList.add("correct-flash");
+    addLog(`restored: ${q.answer} (${q.year})`);
+  } else {
+    clickedBtn.classList.add("wrong-choice");
+    resultEl.innerHTML = `<span class="bad">wrong file opened:</span> archive mismatch detected.<br>Correct file: ${q.answer} (${q.year})`;
+    document.body.classList.add("wrong-flash");
+    addLog(`mismatch: clicked ${choice}, needed ${q.answer}`);
+  }
+
+  setTimeout(() => document.body.classList.remove("correct-flash","wrong-flash"), 550);
+  nextBtn.disabled = false;
+  current++;
+  updateStats();
+}
+
+function showHint(){
+  if(answered || usedHint) return;
+  usedHint = true;
+  const q = questions[current];
+  clueEl.textContent = `metadata clue: this movie file is dated ${q.year}`;
+  hintBtn.disabled = true;
+  addLog(`hint requested: year ${q.year}`);
+}
+
+function nextQuestion(){
+  if(current >= questions.length){
+    endGame();
+  } else {
+    renderQuestion();
+  }
+}
+
+function endGame(){
+  const total = questions.length;
+  const percent = Math.round((score / total) * 100);
+  progressBar.style.width = "100%";
+  progressLabel.textContent = "archive scan: 100%";
+  document.getElementById("screen").innerHTML = `
+    <div class="final">
+      <h2>scan complete</h2>
+      <div class="big-score">${score} / ${total}</div>
+      <p><b>machine confidence: ${percent}%</b></p>
+      <p>${finalMessage(percent)}</p>
+      <button class="action-btn primary" onclick="restartGame()">play again</button>
+    </div>
+  `;
+  addLog(`final score: ${score}/${total}`);
+}
+
+function finalMessage(percent){
+  if(percent >= 90) return "You restored the dialogue cache. The lines survived as memory, file name, and fan signal.";
+  if(percent >= 60) return "Most of the archive opened. A few lines are still ghost files, waiting for another fan to remember them.";
+  return "The cache glitched, but that is part of the point: dialogue survives unevenly, through fragments and half-remembered files.";
+}
+
+function restartGame(){
+  questions = shuffle(ALL_QUESTIONS);
+  current = 0;
+  score = 0;
+  logEl.innerHTML = "<li>system: dialogue fragments reshuffled.</li>";
+  stampEl.textContent = `${ALL_QUESTIONS.length} fragments loaded · recognition test ready`;
+
+  // If the final screen replaced the game, reload the page to restore the original structure.
+  if(!document.getElementById("dialogue")){
+    window.location.reload();
+    return;
+  }
+  renderQuestion();
+}
+
+restartGame();
+</script>
+</body>
+</html>
