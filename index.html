@@ -152,9 +152,14 @@
   .w-glow{ width:210px; left:51.6%; top:560px; }     /* glow_anim.gif, color bleed */
   .w-glow .body{ aspect-ratio:474/247; }
 
-  /* GLB window — sits right of the title text */
-  .w-glb{ width:220px; left:52%; top:18px; }
+  /* GLB window — small, between scan_04 and the ENTER disc */
+  .w-glb{ width:112px; left:73.2%; top:558px; }
   .w-glb .body{ aspect-ratio:1/1; background:#1a1030; overflow:visible; }
+
+  /* close button on every window bar */
+  .win .bar .close-btn{ background:none; border:none; color:#efeaff; font-family:"Courier New",monospace; font-size:11px; cursor:pointer; padding:0 0 0 4px; line-height:1; }
+  .win .bar .close-btn:hover{ color:#ff7ad9; }
+  .win.closed{ display:none; }
   .enter-zone{ position:absolute; left:80.6%; top:382px; text-align:center; z-index:20; }
   .enter-disc{ display:inline-flex; flex-direction:column; align-items:center; gap:12px; cursor:pointer; background:none; border:none; }
   .disc-frame{ width:170px; aspect-ratio:1; position:relative; }
@@ -244,7 +249,7 @@
         <span class="g1" aria-hidden="true">King Khan,<br>Katched</span>
         <span class="g2" aria-hidden="true">King Khan,<br>Katched</span>
       </div>
-      <div class="subtitle">documenting shah rukh khan on the early web &mdash; and the early web through him. 1992&ndash;2007.<br><span style="font-family:'Courier New',monospace;font-size:11px;color:#2e2150;">click the disc to enter &middot; drag the title bar to move &middot; drag the corner to resize</span></div>
+      <div class="subtitle">documenting shah rukh khan on the early web &mdash; and the early web through him. 1992&ndash;2007.<br><span style="font-family:'Courier New',monospace;font-size:11px;color:#2e2150;">click the disc to enter &middot; drag the title bar to move &middot; drag the corner to resize &middot; click &#10005; to close</span></div>
     </div>
   </div>
 
@@ -396,6 +401,22 @@
   // ---- draggable + resizable windows ----
   (function(){
     var scatter=document.querySelector('.scatter');
+
+    // wire up the ✕ close button on every window
+    document.querySelectorAll('.win').forEach(function(win){
+      var ctrl=win.querySelector('.ctrl');
+      if(!ctrl) return;
+      ctrl.innerHTML='_ \u25A1 ';
+      var btn=document.createElement('button');
+      btn.className='close-btn';
+      btn.textContent='\u2715';
+      btn.setAttribute('aria-label','close window');
+      btn.addEventListener('click',function(e){
+        e.stopPropagation();
+        win.classList.add('closed');
+      });
+      ctrl.appendChild(btn);
+    });
 
     // give every window a resize grip
     document.querySelectorAll('.win').forEach(function(win){
